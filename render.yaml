@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: deadman-switch
+    env: python
+    buildCommand: "uv sync && uv run alembic upgrade head"
+    startCommand: "uv run gunicorn deadman_switch.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "30"
+    
+  - type: redis
+    name: deadman-switch-redis
+    ipAllowList: []
+
+databases:
+  - name: deadman-switch-db
+    databaseName: deadman_switch
+    user: deadman_switch_user

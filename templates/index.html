@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Deadman Switch{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-primary">
+                <i class="bi bi-shield-check"></i> Deadman Switch
+            </h1>
+            <p class="lead text-muted">
+                Stay connected, stay safe. Automated check-ins to ensure your well-being.
+            </p>
+        </div>
+
+        {% if not user %}
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="bi bi-clock-history display-4 text-primary mb-3"></i>
+                        <h5 class="card-title">Regular Check-ins</h5>
+                        <p class="card-text">Set up automated check-in schedules to let your contacts know you're safe.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="bi bi-people display-4 text-success mb-3"></i>
+                        <h5 class="card-title">Emergency Contacts</h5>
+                        <p class="card-text">Configure trusted contacts who will be notified if you miss your check-ins.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="bi bi-phone display-4 text-info mb-3"></i>
+                        <h5 class="card-title">Mobile Ready</h5>
+                        <p class="card-text">Access from any device with our mobile-friendly interface and upcoming app.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="/auth/register" class="btn btn-primary btn-lg me-3">
+                <i class="bi bi-person-plus"></i> Get Started
+            </a>
+            <a href="/auth/login" class="btn btn-outline-primary btn-lg">
+                <i class="bi bi-box-arrow-in-right"></i> Sign In
+            </a>
+        </div>
+        {% else %}
+        <div class="text-center">
+            <h2>Welcome back, {{ user.full_name or user.username }}!</h2>
+            <p class="lead">Ready to manage your deadman switches?</p>
+            
+            {% if user.role == "admin" %}
+            <a href="/admin/dashboard" class="btn btn-primary btn-lg">
+                <i class="bi bi-speedometer2"></i> Go to Admin Dashboard
+            </a>
+            {% else %}
+            <a href="/client/dashboard" class="btn btn-primary btn-lg">
+                <i class="bi bi-house"></i> Go to Dashboard
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if not user %}
+<div class="row mt-5">
+    <div class="col-lg-10 mx-auto">
+        <div class="bg-light p-4 rounded">
+            <h3 class="text-center mb-4">How It Works</h3>
+            <div class="row">
+                <div class="col-md-3 text-center mb-3">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <span class="fw-bold">1</span>
+                    </div>
+                    <h5 class="mt-2">Create Switch</h5>
+                    <p class="small">Set up your deadman switch with check-in intervals and emergency contacts.</p>
+                </div>
+                <div class="col-md-3 text-center mb-3">
+                    <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <span class="fw-bold">2</span>
+                    </div>
+                    <h5 class="mt-2">Regular Check-ins</h5>
+                    <p class="small">Check in regularly through the web interface or mobile app.</p>
+                </div>
+                <div class="col-md-3 text-center mb-3">
+                    <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <span class="fw-bold">3</span>
+                    </div>
+                    <h5 class="mt-2">Automatic Alerts</h5>
+                    <p class="small">If you miss a check-in, the system sends warnings and notifications.</p>
+                </div>
+                <div class="col-md-3 text-center mb-3">
+                    <div class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <span class="fw-bold">4</span>
+                    </div>
+                    <h5 class="mt-2">Emergency Contact</h5>
+                    <p class="small">Your emergency contacts are notified if the deadman switch is triggered.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

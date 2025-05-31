@@ -112,22 +112,34 @@ async def authenticate_user(db: AsyncSession, username: str, password: str) -> O
 
 
 async def get_current_user(
+    request: Request,
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
     db: AsyncSession = Depends(get_db)
 ) -> Optional[User]:
     """Get current authenticated user"""
-    if not credentials:
+    token = None
+
+    # Try to get token from Authorization header first
+    if credentials:
+        token = credentials.credentials
+    else:
+        # Try to get token from cookie
+        cookie_token = request.cookies.get("access_token")
+        if cookie_token and cookie_token.startswith("Bearer "):
+            token = cookie_token[7:]  # Remove "Bearer " prefix
+
+    if not token:
         return None
-    
+
     try:
-        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             return None
         token_data = TokenData(username=username)
     except JWTError:
         return None
-    
+
     user = await get_user_by_username(db, username=token_data.username)
     return user
 
@@ -261,6 +273,18 @@ async def register(
     return templates.TemplateResponse(
         "auth/login.html",
         {"request": request, "success": "Registration successful! Please log in."}
+    )
+
+
+@router.get("/profile", response_class=HTMLResponse)
+async def profile_page(
+    request: Request,
+    current_user: User = Depends(get_current_active_user)
+):
+    """User profile page"""
+    return templates.TemplateResponse(
+        "auth/profile.html",
+        {"request": request, "user": current_user}
     )
 
 

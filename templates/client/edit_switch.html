@@ -1,33 +1,39 @@
 {% extends "base.html" %}
-
-{% block title %}Create Switch - Deadman Switch{% endblock %}
+{% block title %}Edit Switch - Deadman Switch{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-pencil-square"></i> Edit Switch</h1>
+    <a href="/client/switches/{{ switch.id }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Switch
+    </a>
+</div>
+
+{% if error %}
+<div class="alert alert-danger" role="alert">
+    <i class="bi bi-exclamation-triangle"></i> {{ error }}
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <h3 class="mb-0"><i class="bi bi-plus-circle"></i> Create New Deadman Switch</h3>
+                <h5 class="mb-0">Switch Details</h5>
             </div>
             <div class="card-body">
-                {% if error %}
-                <div class="alert alert-danger" role="alert">
-                    <i class="bi bi-exclamation-triangle"></i> {{ error }}
-                </div>
-                {% endif %}
-
-                <form method="post" action="/client/switches/create">
+                <form method="post" action="/client/switches/{{ switch.id }}/edit">
                     <div class="mb-3">
                         <label for="name" class="form-label">Switch Name <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="name" name="name" required 
-                               placeholder="e.g., Daily Check-in, Work Safety">
-                        <div class="form-text">Give your switch a descriptive name</div>
+                        <input type="text" class="form-control" id="name" name="name"
+                               value="{{ switch.name }}" required>
+                        <div class="form-text">A descriptive name for your deadman switch</div>
                     </div>
 
                     <div class="mb-3">
                         <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" name="description" rows="3" 
-                                  placeholder="Optional description of what this switch is for"></textarea>
+                        <textarea class="form-control" id="description" name="description" rows="3"
+                                  placeholder="Optional description of what this switch is for">{{ switch.description or '' }}</textarea>
                     </div>
 
                     <div class="row">
@@ -36,10 +42,10 @@
                                 <label for="check_in_interval" class="form-label">Check-in Interval <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <input type="number" class="form-control" id="check_in_interval"
-                                           name="check_in_interval" value="1" min="1" max="365" required>
+                                           name="check_in_interval" value="{{ switch_interval_value }}" min="1" max="365" required>
                                     <select class="form-select" id="check_in_interval_unit" name="check_in_interval_unit" style="max-width: 100px;">
-                                        <option value="hours">Hours</option>
-                                        <option value="days" selected>Days</option>
+                                        <option value="hours" {% if switch_interval_unit == 'hours' %}selected{% endif %}>Hours</option>
+                                        <option value="days" {% if switch_interval_unit == 'days' %}selected{% endif %}>Days</option>
                                     </select>
                                 </div>
                                 <div class="form-text">How often you need to check in</div>
@@ -50,10 +56,10 @@
                                 <label for="grace_period" class="form-label">Grace Period</label>
                                 <div class="input-group">
                                     <input type="number" class="form-control" id="grace_period"
-                                           name="grace_period" value="2" min="0" max="24">
+                                           name="grace_period" value="{{ switch_grace_value }}" min="0" max="24">
                                     <select class="form-select" id="grace_period_unit" name="grace_period_unit" style="max-width: 100px;">
-                                        <option value="hours" selected>Hours</option>
-                                        <option value="days">Days</option>
+                                        <option value="hours" {% if switch_grace_unit == 'hours' %}selected{% endif %}>Hours</option>
+                                        <option value="days" {% if switch_grace_unit == 'days' %}selected{% endif %}>Days</option>
                                     </select>
                                 </div>
                                 <div class="form-text">Extra time before triggering</div>
@@ -63,20 +69,52 @@
 
                     <div class="alert alert-info">
                         <i class="bi bi-info-circle"></i>
-                        <strong>How it works:</strong> You'll need to check in every 
-                        <span id="interval-display">24</span> hours. If you don't check in within 
-                        <span id="grace-display">2</span> hours after the deadline, your emergency contacts will be notified.
+                        <strong>Note:</strong> Changing the check-in interval will reset your next check-in deadline.
                     </div>
 
-                    <div class="d-flex justify-content-between">
-                        <a href="/client/switches" class="btn btn-secondary">
-                            <i class="bi bi-arrow-left"></i> Cancel
-                        </a>
+                    <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-plus-circle"></i> Create Switch
+                            <i class="bi bi-check-circle"></i> Update Switch
                         </button>
+                        <a href="/client/switches/{{ switch.id }}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Current Settings</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Name:</strong><br>
+                    <span class="text-muted">{{ switch.name }}</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Status:</strong><br>
+                    {% if switch.status == 'active' %}
+                    <span class="badge bg-success">Active</span>
+                    {% elif switch.status == 'triggered' %}
+                    <span class="badge bg-danger">Triggered</span>
+                    {% elif switch.status == 'paused' %}
+                    <span class="badge bg-warning">Paused</span>
+                    {% else %}
+                    <span class="badge bg-secondary">{{ switch.status.title() }}</span>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <strong>Current Interval:</strong><br>
+                    <span class="text-muted">{{ switch_interval_display }}</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Grace Period:</strong><br>
+                    <span class="text-muted">{{ switch_grace_display }}</span>
+                </div>
             </div>
         </div>
     </div>
@@ -87,13 +125,13 @@
 function updateIntervalDisplay() {
     const interval = document.getElementById('check_in_interval').value;
     const unit = document.getElementById('check_in_interval_unit').value;
-    document.getElementById('interval-display').textContent = interval + ' ' + unit;
+    // Update display if needed
 }
 
 function updateGraceDisplay() {
     const grace = document.getElementById('grace_period').value;
     const unit = document.getElementById('grace_period_unit').value;
-    document.getElementById('grace-display').textContent = grace + ' ' + unit;
+    // Update display if needed
 }
 
 document.getElementById('check_in_interval').addEventListener('input', updateIntervalDisplay);
@@ -121,10 +159,6 @@ document.getElementById('grace_period_unit').addEventListener('change', function
         graceInput.max = 30; // 30 days max
     }
 });
-
-// Initialize displays
-updateIntervalDisplay();
-updateGraceDisplay();
 </script>
 {% endblock %}
 {% endblock %}

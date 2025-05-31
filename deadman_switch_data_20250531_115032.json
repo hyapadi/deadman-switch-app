@@ -1,0 +1,59 @@
+{
+  "timestamp": "20250531_115032",
+  "users": [
+    {
+      "id": 1,
+      "email": "admin@deadmanswitch.com",
+      "username": "admin",
+      "hashed_password": "$2b$12$6BGAGNjj2vD40FC2b9HCouGMNn2xDI9wQQD7Mx.QzfG54KbFyAWjS",
+      "full_name": "System Administrator",
+      "role": "admin",
+      "is_active": 1,
+      "is_verified": 1,
+      "created_at": "2025-05-31 03:22:26",
+      "updated_at": "2025-05-31 04:47:38",
+      "last_login": "2025-05-31 04:47:38.491631"
+    },
+    {
+      "id": 2,
+      "email": "hans@yahoo.com",
+      "username": "Hans",
+      "hashed_password": "$2b$12$oyuLjEwCVEgH3w4TbWm0cuQItRz9.koHWoZFfhi.ey1xOo.Z1Ug66",
+      "full_name": "hans",
+      "role": "client",
+      "is_active": 1,
+      "is_verified": 0,
+      "created_at": "2025-05-31 04:46:56",
+      "updated_at": null,
+      "last_login": null
+    },
+    {
+      "id": 3,
+      "email": "user123@example.com",
+      "username": "user123",
+      "hashed_password": "$2b$12$dgCH9rteLvHpiyX2qVp6iO/42D.RxtAwbds8FYwADWOmDShwYDBRK",
+      "full_name": "User 123",
+      "role": "client",
+      "is_active": 1,
+      "is_verified": 1,
+      "created_at": "2025-05-31 04:48:19",
+      "updated_at": null,
+      "last_login": null
+    },
+    {
+      "id": 4,
+      "email": "user@example.com",
+      "username": "user",
+      "hashed_password": "$2b$12$uUf6ZPrNg41CMj9pMPb4IOD0rsY/WCd3g2OFLWaoeEyN6Wo67go0a",
+      "full_name": "Test User",
+      "role": "client",
+      "is_active": 1,
+      "is_verified": 1,
+      "created_at": "2025-05-31 04:48:53",
+      "updated_at": "2025-05-31 04:49:22",
+      "last_login": "2025-05-31 04:49:22.935438"
+    }
+  ],
+  "deadman_switches": [],
+  "check_ins": []
+}

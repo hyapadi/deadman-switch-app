@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Deadman Switches - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/dashboard">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/users">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin/switches">
+                            <i class="fas fa-toggle-on"></i> Deadman Switches
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/notifications">
+                            <i class="fas fa-bell"></i> Notifications
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/settings">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                    </li>
+                </ul>
+                
+                <hr>
+                
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <form method="post" action="/auth/logout" class="d-inline">
+                            <button type="submit" class="btn btn-link nav-link text-start">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Deadman Switches</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Switches Table -->
+            <div class="table-responsive">
+                <table class="table table-striped table-sm">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Owner</th>
+                            <th>Status</th>
+                            <th>Interval</th>
+                            <th>Last Check-in</th>
+                            <th>Next Due</th>
+                            <th>Notifications</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for switch in switches %}
+                        <tr>
+                            <td>{{ switch.id }}</td>
+                            <td>
+                                <strong>{{ switch.name }}</strong>
+                                {% if switch.description %}
+                                <br><small class="text-muted">{{ switch.description[:50] }}{% if switch.description|length > 50 %}...{% endif %}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="/admin/users" class="text-decoration-none">
+                                    User {{ switch.user_id }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if switch.status == 'active' %}
+                                <span class="badge bg-success">Active</span>
+                                {% elif switch.status == 'triggered' %}
+                                <span class="badge bg-danger">Triggered</span>
+                                {% elif switch.status == 'paused' %}
+                                <span class="badge bg-warning">Paused</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ switch.status.title() }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-info">24h</span>
+                            </td>
+                            <td>
+                                <small class="text-muted">Recent</small>
+                            </td>
+                            <td>
+                                <small class="text-muted">Scheduled</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">0</span>
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    Recent
+                                </small>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                                            onclick="viewSwitch({{ switch.id }})">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-warning"
+                                            onclick="toggleSwitch({{ switch.id }})">
+                                        {% if switch.status == 'active' %}
+                                        <i class="fas fa-pause"></i>
+                                        {% else %}
+                                        <i class="fas fa-play"></i>
+                                        {% endif %}
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                            onclick="deleteSwitch({{ switch.id }})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if not switches %}
+            <div class="text-center py-5">
+                <i class="fas fa-toggle-on fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No deadman switches found</h4>
+                <p class="text-muted">Deadman switches created by users will appear here.</p>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+<script>
+function viewSwitch(switchId) {
+    // Redirect to client switch detail page for viewing
+    window.open('/client/switches/' + switchId, '_blank');
+}
+
+function toggleSwitch(switchId) {
+    if (confirm('Are you sure you want to toggle this switch status?')) {
+        // Create a form and submit it
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin/switches/' + switchId + '/toggle-enabled';
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function deleteSwitch(switchId) {
+    if (confirm('Are you sure you want to delete this switch? This action cannot be undone.')) {
+        // Create a form and submit it
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin/switches/' + switchId + '/delete';
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

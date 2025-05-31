@@ -8,6 +8,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, desc
+from sqlalchemy.orm import selectinload
 from pydantic import BaseModel
 
 from .database import get_db
@@ -103,15 +104,17 @@ async def admin_dashboard(
     # Recent triggered switches
     triggered_switches_result = await db.execute(
         select(DeadmanSwitch)
+        .options(selectinload(DeadmanSwitch.user))
         .where(DeadmanSwitch.status == SwitchStatus.TRIGGERED)
-        .order_by(desc(DeadmanSwitch.triggered_at))
+        .order_by(desc(DeadmanSwitch.updated_at))
         .limit(10)
     )
     triggered_switches = triggered_switches_result.scalars().all()
-    
+
     # Recent check-ins
     recent_check_ins_result = await db.execute(
         select(CheckIn)
+        .options(selectinload(CheckIn.user), selectinload(CheckIn.deadman_switch))
         .order_by(desc(CheckIn.check_in_time))
         .limit(10)
     )
@@ -289,8 +292,56 @@ async def toggle_switch_enabled(
         switch.status = SwitchStatus.ACTIVE
     
     await db.commit()
-    
+
     return RedirectResponse(url="/admin/switches", status_code=302)
+
+
+@router.post("/switches/{switch_id}/delete")
+async def delete_switch_admin(
+    switch_id: int,
+    admin_user: User = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Delete a switch (admin only)"""
+    # Get switch
+    result = await db.execute(
+        select(DeadmanSwitch).where(DeadmanSwitch.id == switch_id)
+    )
+    switch = result.scalar_one_or_none()
+
+    if not switch:
+        raise HTTPException(status_code=404, detail="Switch not found")
+
+    # Delete the switch
+    await db.execute(
+        DeadmanSwitch.__table__.delete().where(DeadmanSwitch.id == switch_id)
+    )
+    await db.commit()
+
+    return RedirectResponse(url="/admin/switches", status_code=302)
+
+
+@router.get("/settings", response_class=HTMLResponse)
+async def admin_settings(
+    request: Request,
+    admin_user: User = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Admin settings page"""
+    # Get system settings
+    settings_result = await db.execute(
+        select(SystemSettings).order_by(SystemSettings.key)
+    )
+    settings = settings_result.scalars().all()
+
+    return templates.TemplateResponse(
+        "admin/settings.html",
+        {
+            "request": request,
+            "user": admin_user,
+            "settings": settings
+        }
+    )
 
 
 @router.post("/settings/update")

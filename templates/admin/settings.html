@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/dashboard">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/users">
+                            <i class="bi bi-people"></i> Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/switches">
+                            <i class="bi bi-toggle-on"></i> Deadman Switches
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/notifications">
+                            <i class="bi bi-bell"></i> Notifications
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin/settings">
+                            <i class="bi bi-gear"></i> Settings
+                        </a>
+                    </li>
+                </ul>
+
+                <hr>
+
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <form method="post" action="/auth/logout" class="d-inline">
+                            <button type="submit" class="btn btn-link nav-link text-start">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">System Settings</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-sm btn-primary" onclick="saveSettings()">
+                            <i class="bi bi-check-circle"></i> Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Form -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <form id="settingsForm">
+                        <!-- Email Settings -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-envelope"></i> Email Settings
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="smtp_host" class="form-label">SMTP Host</label>
+                                            <input type="text" class="form-control" id="smtp_host" 
+                                                   value="smtp.gmail.com" placeholder="smtp.gmail.com">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="smtp_port" class="form-label">SMTP Port</label>
+                                            <input type="number" class="form-control" id="smtp_port" 
+                                                   value="587" placeholder="587">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="smtp_username" class="form-label">SMTP Username</label>
+                                            <input type="email" class="form-control" id="smtp_username" 
+                                                   placeholder="your-email@gmail.com">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="smtp_password" class="form-label">SMTP Password</label>
+                                            <input type="password" class="form-control" id="smtp_password" 
+                                                   placeholder="Your app password">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="from_email" class="form-label">From Email</label>
+                                    <input type="email" class="form-control" id="from_email" 
+                                           placeholder="noreply@deadmanswitch.com">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="from_name" class="form-label">From Name</label>
+                                    <input type="text" class="form-control" id="from_name" 
+                                           value="Deadman Switch" placeholder="Deadman Switch">
+                                </div>
+                                <div class="mb-3">
+                                    <button type="button" class="btn btn-outline-primary" onclick="testEmail()">
+                                        <i class="bi bi-send"></i> Test Email Configuration
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System Settings -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-gear"></i> System Settings
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="default_check_interval" class="form-label">Default Check-in Interval (hours)</label>
+                                            <input type="number" class="form-control" id="default_check_interval" 
+                                                   value="24" min="1" max="168">
+                                            <div class="form-text">Default interval for new deadman switches</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="max_switches_per_user" class="form-label">Max Switches per User</label>
+                                            <input type="number" class="form-control" id="max_switches_per_user" 
+                                                   value="10" min="1" max="100">
+                                            <div class="form-text">Maximum number of switches a user can create</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="notification_retry_hours" class="form-label">Notification Retry Interval (hours)</label>
+                                            <input type="number" class="form-control" id="notification_retry_hours" 
+                                                   value="6" min="1" max="24">
+                                            <div class="form-text">How often to retry failed notifications</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="max_notification_retries" class="form-label">Max Notification Retries</label>
+                                            <input type="number" class="form-control" id="max_notification_retries" 
+                                                   value="3" min="1" max="10">
+                                            <div class="form-text">Maximum retry attempts for notifications</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="allow_registration" checked>
+                                        <label class="form-check-label" for="allow_registration">
+                                            Allow User Registration
+                                        </label>
+                                        <div class="form-text">Allow new users to register accounts</div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="require_email_verification" checked>
+                                        <label class="form-check-label" for="require_email_verification">
+                                            Require Email Verification
+                                        </label>
+                                        <div class="form-text">Require users to verify their email addresses</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security Settings -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-shield-check"></i> Security Settings
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="session_timeout" class="form-label">Session Timeout (minutes)</label>
+                                            <input type="number" class="form-control" id="session_timeout" 
+                                                   value="30" min="5" max="1440">
+                                            <div class="form-text">How long user sessions remain active</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="password_min_length" class="form-label">Minimum Password Length</label>
+                                            <input type="number" class="form-control" id="password_min_length" 
+                                                   value="8" min="6" max="32">
+                                            <div class="form-text">Minimum required password length</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Current Settings Display -->
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">Current Settings</h6>
+                        </div>
+                        <div class="card-body">
+                            {% if settings %}
+                            <ul class="list-unstyled">
+                                {% for setting in settings %}
+                                <li class="mb-2">
+                                    <strong>{{ setting.key }}:</strong><br>
+                                    <small class="text-muted">{{ setting.value }}</small>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% else %}
+                            <p class="text-muted">No settings configured yet.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+function saveSettings() {
+    // TODO: Implement settings save functionality
+    alert('Save settings functionality not yet implemented');
+}
+
+function testEmail() {
+    // TODO: Implement email test functionality
+    alert('Test email functionality not yet implemented');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Switch Details - Deadman Switch{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/client/dashboard">
+                            <i class="bi bi-speedometer2"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/client/switches">
+                            <i class="bi bi-toggle-on"></i>
+                            My Switches
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/client/switches/create">
+                            <i class="bi bi-plus-circle"></i>
+                            Create Switch
+                        </a>
+                    </li>
+                </ul>
+
+                <hr>
+
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <form method="post" action="/auth/logout" class="d-inline">
+                            <button type="submit" class="nav-link btn btn-link text-start p-0 border-0">
+                                <i class="bi bi-box-arrow-right"></i>
+                                Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Switch Details</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="/client/switches" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Switches
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Switch Information -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">{{ switch.name }}</h5>
+                            <span class="badge {% if switch.status == 'active' %}bg-success{% elif switch.status == 'triggered' %}bg-danger{% elif switch.status == 'disabled' %}bg-secondary{% else %}bg-warning{% endif %}">
+                                {{ switch.status.title() }}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Description:</strong></p>
+                                    <p class="text-muted">{{ switch.description or 'No description provided' }}</p>
+                                    
+                                    <p><strong>Check-in Interval:</strong></p>
+                                    <p class="text-muted">{{ (switch.check_in_interval.total_seconds() / 3600)|int }} hours</p>
+
+                                    <p><strong>Grace Period:</strong></p>
+                                    <p class="text-muted">{{ (switch.grace_period.total_seconds() / 3600)|int }} hours</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Created:</strong></p>
+                                    <p class="text-muted">{{ switch.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                                    
+                                    <p><strong>Last Check-in:</strong></p>
+                                    <p class="text-muted">
+                                        {% if switch.last_check_in %}
+                                            {{ switch.last_check_in.strftime('%Y-%m-%d %H:%M') }}
+                                        {% else %}
+                                            Never
+                                        {% endif %}
+                                    </p>
+                                    
+                                    <p><strong>Next Check-in Due:</strong></p>
+                                    <p class="text-muted">
+                                        {% if next_check_in %}
+                                            {{ next_check_in.strftime('%Y-%m-%d %H:%M') }}
+                                            {% if is_overdue %}
+                                                <span class="badge bg-danger ms-2">OVERDUE</span>
+                                            {% endif %}
+                                        {% else %}
+                                            Not scheduled
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            {% if switch.is_enabled %}
+                            <div class="mt-3">
+                                <form method="post" action="/client/switches/{{ switch.id }}/check-in" class="d-inline">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-check-circle"></i> Check In Now
+                                    </button>
+                                </form>
+
+                                <form method="post" action="/client/switches/{{ switch.id }}/disable" class="d-inline ms-2">
+                                    <button type="submit" class="btn btn-warning" onclick="return confirm('Are you sure you want to disable this switch?')">
+                                        <i class="bi bi-pause-circle"></i> Disable Switch
+                                    </button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <div class="mt-3">
+                                <form method="post" action="/client/switches/{{ switch.id }}/enable" class="d-inline">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-play-circle"></i> Enable Switch
+                                    </button>
+                                </form>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <!-- Emergency Contacts -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">Emergency Contacts</h6>
+                        </div>
+                        <div class="card-body">
+                            {% if contacts %}
+                                {% for contact in contacts %}
+                                <div class="mb-2 pb-2 {% if not loop.last %}border-bottom{% endif %}">
+                                    <strong>{{ contact.name }}</strong>
+                                    {% if contact.contact_relationship %}
+                                        <small class="text-muted">({{ contact.contact_relationship }})</small>
+                                    {% endif %}
+                                    <br>
+                                    {% if contact.email %}
+                                        <small><i class="bi bi-envelope"></i> {{ contact.email }}</small><br>
+                                    {% endif %}
+                                    {% if contact.phone %}
+                                        <small><i class="bi bi-telephone"></i> {{ contact.phone }}</small>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted mb-0">No emergency contacts configured</p>
+                                <a href="/client/switches/{{ switch.id }}/contacts/add" class="btn btn-sm btn-outline-primary mt-2">
+                                    <i class="bi bi-plus-circle"></i> Add Contact
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">Quick Actions</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="/client/switches/{{ switch.id }}/edit" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-pencil-square"></i> Edit Switch
+                                </a>
+                                <a href="/client/switches/{{ switch.id }}/test" class="btn btn-outline-info btn-sm">
+                                    <i class="bi bi-bell"></i> Test Notifications
+                                </a>
+                                <button class="btn btn-outline-danger btn-sm" onclick="deleteSwitch()">
+                                    <i class="bi bi-trash"></i> Delete Switch
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Check-ins -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">Recent Check-ins</h6>
+                        </div>
+                        <div class="card-body">
+                            {% if check_ins %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Date & Time</th>
+                                                <th>Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for check_in in check_ins %}
+                                            <tr>
+                                                <td>{{ check_in.check_in_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                                                <td>{{ check_in.notes or '-' }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted mb-0">No check-ins yet</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+function deleteSwitch() {
+    if (confirm('Are you sure you want to delete this switch? This action cannot be undone.')) {
+        // Create a form and submit it
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/client/switches/{{ switch.id }}/delete';
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

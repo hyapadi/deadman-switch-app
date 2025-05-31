@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Profile - Deadman Switch{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="bi bi-person-circle"></i> User Profile
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Username:</strong></label>
+                                <p class="form-control-plaintext">{{ user.username }}</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Email:</strong></label>
+                                <p class="form-control-plaintext">{{ user.email }}</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Full Name:</strong></label>
+                                <p class="form-control-plaintext">{{ user.full_name or 'Not provided' }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Role:</strong></label>
+                                <p class="form-control-plaintext">
+                                    {% if user.role == 'admin' %}
+                                    <span class="badge bg-danger">Administrator</span>
+                                    {% else %}
+                                    <span class="badge bg-primary">User</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Status:</strong></label>
+                                <p class="form-control-plaintext">
+                                    {% if user.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Member Since:</strong></label>
+                                <p class="form-control-plaintext">
+                                    <small class="text-muted">Account created</small>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <h6>Account Actions</h6>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-primary" onclick="alert('Profile editing coming soon!')">
+                                    <i class="bi bi-pencil"></i> Edit Profile
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="alert('Password change coming soon!')">
+                                    <i class="bi bi-key"></i> Change Password
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-3">
+                {% if user.role == 'admin' %}
+                <a href="/admin/dashboard" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Admin Dashboard
+                </a>
+                {% else %}
+                <a href="/client/dashboard" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

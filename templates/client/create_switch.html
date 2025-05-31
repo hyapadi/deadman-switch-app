@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Create Switch - Deadman Switch{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="bi bi-plus-circle"></i> Create New Deadman Switch</h3>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i> {{ error }}
+                </div>
+                {% endif %}
+
+                <form method="post" action="/client/switches/create">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Switch Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" required 
+                               placeholder="e.g., Daily Check-in, Work Safety">
+                        <div class="form-text">Give your switch a descriptive name</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" 
+                                  placeholder="Optional description of what this switch is for"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="check_in_interval_hours" class="form-label">Check-in Interval (hours) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="check_in_interval_hours" 
+                                       name="check_in_interval_hours" value="24" min="1" max="168" required>
+                                <div class="form-text">How often you need to check in</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="grace_period_hours" class="form-label">Grace Period (hours)</label>
+                                <input type="number" class="form-control" id="grace_period_hours" 
+                                       name="grace_period_hours" value="2" min="0" max="24">
+                                <div class="form-text">Extra time before triggering</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>How it works:</strong> You'll need to check in every 
+                        <span id="interval-display">24</span> hours. If you don't check in within 
+                        <span id="grace-display">2</span> hours after the deadline, your emergency contacts will be notified.
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="/client/switches" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Create Switch
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+document.getElementById('check_in_interval_hours').addEventListener('input', function() {
+    document.getElementById('interval-display').textContent = this.value;
+});
+
+document.getElementById('grace_period_hours').addEventListener('input', function() {
+    document.getElementById('grace-display').textContent = this.value;
+});
+</script>
+{% endblock %}
+{% endblock %}

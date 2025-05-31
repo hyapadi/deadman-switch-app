@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Deadman Switch{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-speedometer2"></i> Admin Dashboard</h1>
+    <div class="text-muted">Welcome, {{ user.full_name or user.username }}</div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Total Users</h5>
+                        <h2 class="mb-0">{{ stats.total_users }}</h2>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-people display-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Active Switches</h5>
+                        <h2 class="mb-0">{{ stats.active_switches }}</h2>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-toggle-on display-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Triggered</h5>
+                        <h2 class="mb-0">{{ stats.triggered_switches }}</h2>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-exclamation-triangle display-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Recent Check-ins</h5>
+                        <h2 class="mb-0">{{ stats.recent_check_ins }}</h2>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-check-circle display-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Triggered Switches -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle text-danger"></i> Recently Triggered Switches</h5>
+            </div>
+            <div class="card-body">
+                {% if triggered_switches %}
+                <div class="list-group list-group-flush">
+                    {% for switch in triggered_switches %}
+                    <div class="list-group-item d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1">{{ switch.name }}</h6>
+                            <p class="mb-1 text-muted small">User: {{ switch.user.username }}</p>
+                            <small class="text-danger">Triggered: {{ switch.triggered_at.strftime('%Y-%m-%d %H:%M') if switch.triggered_at else 'Unknown' }}</small>
+                        </div>
+                        <span class="badge bg-danger">Triggered</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-3">No triggered switches</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Check-ins -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Check-ins</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_check_ins %}
+                <div class="list-group list-group-flush">
+                    {% for check_in in recent_check_ins %}
+                    <div class="list-group-item d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1">{{ check_in.deadman_switch.name }}</h6>
+                            <p class="mb-1 text-muted small">User: {{ check_in.user.username }}</p>
+                            <small class="text-success">{{ check_in.check_in_time.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </div>
+                        <span class="badge bg-success">✓</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-3">No recent check-ins</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-lightning"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <a href="/admin/users" class="btn btn-outline-primary w-100 mb-2">
+                            <i class="bi bi-people"></i><br>
+                            Manage Users
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/admin/switches" class="btn btn-outline-success w-100 mb-2">
+                            <i class="bi bi-toggle-on"></i><br>
+                            View All Switches
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/admin/notifications" class="btn btn-outline-info w-100 mb-2">
+                            <i class="bi bi-bell"></i><br>
+                            Notifications
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/admin/settings" class="btn btn-outline-secondary w-100 mb-2">
+                            <i class="bi bi-gear"></i><br>
+                            System Settings
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

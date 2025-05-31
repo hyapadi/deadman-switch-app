@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}My Switches - Deadman Switch{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-toggle-on"></i> My Switches</h1>
+    <a href="/client/switches/create" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Create New Switch
+    </a>
+</div>
+
+{% if switches %}
+<div class="row">
+    {% for switch in switches %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title">{{ switch.name }}</h5>
+                    <span class="badge bg-{% if switch.status == 'active' %}success{% elif switch.status == 'triggered' %}danger{% elif switch.status == 'paused' %}warning{% else %}secondary{% endif %}">
+                        {{ switch.status|title }}
+                    </span>
+                </div>
+                
+                {% if switch.description %}
+                <p class="card-text text-muted small">{{ switch.description }}</p>
+                {% endif %}
+                
+                <div class="small mb-3">
+                    <div><strong>Check-in Interval:</strong> {{ (switch.check_in_interval.total_seconds() / 3600)|int }} hours</div>
+                    <div><strong>Grace Period:</strong> {{ (switch.grace_period.total_seconds() / 3600)|int }} hours</div>
+                    {% if switch.last_check_in %}
+                    <div><strong>Last Check-in:</strong> {{ switch.last_check_in.strftime('%Y-%m-%d %H:%M') }}</div>
+                    {% else %}
+                    <div><strong>Last Check-in:</strong> Never</div>
+                    {% endif %}
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="btn-group" role="group">
+                        {% if switch.is_enabled %}
+                        <form method="post" action="/client/switches/{{ switch.id }}/check-in" class="d-inline">
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="bi bi-check-circle"></i> Check In
+                            </button>
+                        </form>
+                        {% endif %}
+                        <a href="/client/switches/{{ switch.id }}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-gear"></i> Manage
+                        </a>
+                    </div>
+                    
+                    <form method="post" action="/client/switches/{{ switch.id }}/toggle" class="d-inline">
+                        <button type="submit" class="btn btn-outline-{% if switch.is_enabled %}warning{% else %}success{% endif %} btn-sm">
+                            <i class="bi bi-toggle-{% if switch.is_enabled %}off{% else %}on{% endif %}"></i>
+                            {% if switch.is_enabled %}Pause{% else %}Enable{% endif %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5">
+    <i class="bi bi-toggle-off display-1 text-muted"></i>
+    <h3 class="mt-3">No Switches Yet</h3>
+    <p class="text-muted">Create your first deadman switch to get started.</p>
+    <a href="/client/switches/create" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Create Your First Switch
+    </a>
+</div>
+{% endif %}
+{% endblock %}

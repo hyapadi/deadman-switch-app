@@ -18,7 +18,7 @@ A comprehensive deadman switch application with web-based admin and client inter
 - **Database**: SQLite (development), PostgreSQL (production)
 - **Frontend**: Jinja2 templates, Bootstrap 5, HTMX
 - **Authentication**: JWT tokens, bcrypt password hashing
-- **Deployment**: Render.com ready with Docker support
+- **Deployment**: Docker ready with comprehensive deployment options
 
 ## Quick Start
 
@@ -78,17 +78,33 @@ Once the server is running, visit:
 
 ## Deployment
 
-### Render.com
+### Docker Deployment
 
-This application is configured for easy deployment on Render.com:
+This application is fully containerized and ready for deployment:
 
-1. Connect your GitHub repository to Render
-2. The `render.yaml` file contains all necessary configuration
-3. Environment variables will be automatically set
+**Quick Start:**
+```bash
+# Development (SQLite)
+docker-compose -f docker-compose.dev.yml up
+
+# Production (PostgreSQL + Redis)
+docker-compose up
+
+# Interactive deployment
+./deploy.sh
+```
+
+**Deployment Options:**
+- Local development with hot reload
+- Production with PostgreSQL and Redis
+- Single container deployment
+- Deploy to any Docker platform (Railway, DigitalOcean, AWS, etc.)
+
+See [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md) for complete deployment guide.
 
 ### Manual Deployment
 
-For other platforms:
+For non-Docker deployments:
 
 1. Set environment variables (see `.env.example`)
 2. Run migrations: `uv run alembic upgrade head`

@@ -59,13 +59,10 @@ Thumbs.db
 logs/
 
 # Documentation
-DEPLOYMENT.md
 docs/
 
 # Development files
-deploy_*.py
-quick_deploy.py
-render.yaml
+deploy.sh
 
 # Data directory
 data/
